@@ -1,0 +1,56 @@
+#!/bin/bash
+
+INITIAL="INITIAL";
+GITIGNORE=~/bin/gitignore;
+
+
+Usage(){
+    echo -e "Usage: \n        $0 <git repo name1> [<git repo name2> ...]\n";
+}
+
+createbaregitrepo(){
+
+
+        TMPDIR=$(mktemp -d);
+        pushd . > /dev/null 2>&1;
+        cd "${TMPDIR}";
+        
+        git init;
+        if [ -f $GITIGNORE ]
+        then
+            cp $GITIGNORE  .gitignore
+            git add .gitignore
+        else
+            echo "Initial repo ${1}" > $INITIAL;
+            git add $INITIAL;
+        fi
+        git commit -am "Initial commit";
+        popd > /dev/null 2>&1;
+
+        git clone --bare $TMPDIR "${1}.git";
+        
+        echo "Finished Create ${1}.git";
+
+        rm -rf $TMPDIR;
+
+
+}
+
+if [  $# -lt 1 ]
+then
+    Usage;    
+    exit 5;
+fi
+
+for repo in "$@"
+do
+    #echo "Repo : $repo"
+    if [ -e "${repo}.git" ] 
+    then
+        echo "ERR:${repo}.git IS EXISTS.";
+        continue;
+    fi
+    
+    createbaregitrepo $repo;
+
+done
