@@ -2,7 +2,7 @@
 
 INITIAL="INITIAL";
 GITIGNORE=~/bin/gitignore;
-
+WD=$(pwd)
 
 Usage(){
     echo -e "Usage: \n        $0 <git repo name1> [<git repo name2> ...]\n";
@@ -10,6 +10,12 @@ Usage(){
 
 createbaregitrepo(){
 
+
+    REPONAME="${1}.git";
+    mkdir "${REPONAME}";
+    (
+        cd "${REPONAME}" && git init --bare ;
+    )
 
         TMPDIR=$(mktemp -d);
         pushd . > /dev/null 2>&1;
@@ -20,14 +26,20 @@ createbaregitrepo(){
         then
             cp $GITIGNORE  .gitignore
             git add .gitignore
+            git commit -am "Initial commit.And add gitignore";
         else
             echo "Initial repo ${1}" > $INITIAL;
             git add $INITIAL;
+            git commit -am "Initial commit";
         fi
-        git commit -am "Initial commit";
+
+        git remote add origin "${WD}/${REPONAME}"
+
+        git push -vv origin master:master
+        
         popd > /dev/null 2>&1;
 
-        git clone --bare $TMPDIR "${1}.git";
+#        git clone --bare $TMPDIR "${1}.git";
         
         echo "Finished Create ${1}.git";
 
